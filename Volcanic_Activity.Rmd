@@ -9,27 +9,27 @@ output: ioslides_presentation
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(leaflet)
+library(htmltools)
 ```
 
-The data come from the US Geologic Service (USGS) at https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.csv.
-It is updated every minute, so I output the time at which the data was read in. 
-It only includes earthques with magnitude greater than 2.5.  
+## Earthquakes with magnitude > 2.5
+Source: USGS (earthquake.usgs.gov)  
 
-``` {r readdata}
-qdb = read.csv(url("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.csv"))
+``` {r read}
+qdb = read.csv(url("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.csv"))
 quakes = qdb %>% select(c("latitude","longitude",mag))
-Sys.time()
 ```
 
+``` {r map}
 
-``` {r make_leaflet_map}
 quakes %>% 
   leaflet() %>% 
   addTiles() %>% 
   addCircleMarkers(lng = quakes$longitude, 
                    lat = quakes$latitude, 
-                   radius = quakes$mag,
-                   popup = quakes$mag,
+                   radius = sqrt(exp(quakes$mag))/2,
+                   popup = ~htmlEscape(quakes$mag),
+                   color = "red",
                    stroke = FALSE, 
                    fillOpacity = 0.3)
 ```
